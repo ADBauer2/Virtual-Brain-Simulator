@@ -13,11 +13,14 @@ if not os.path.exists(connectivity_path):
 conn = connectivity.Connectivity.from_file(connectivity_path)
 
 # Configure simulation
+num_nodes = 76
 conn.speed = np.array([3.0])
+conn.weights[:num_nodes, :num_nodes]
 jansen_rit = models.JansenRit()
-linear_coupling = coupling.Linear(a=np.array([0.015]))
-integrator = simulator.integrators.HeunDeterministic(dt=0.1)
+linear_coupling = coupling.Linear(a=np.array([0.005]))
+integrator = simulator.integrators.HeunDeterministic(dt=0.01)
 raw_monitor = monitors.Raw()
+
 
 sim = simulator.Simulator(
     model=jansen_rit,
@@ -30,7 +33,7 @@ sim.configure()
 
 # Run the simulation
 simulation_length = 1000
-(raw_data,), = sim.run(simulation_length=simulation_length)
+raw_data, = sim.run(simulation_length=simulation_length)
 
 # Display results
 time_series = raw_data[1][:, :, 0]
