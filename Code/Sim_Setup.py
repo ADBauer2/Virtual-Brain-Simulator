@@ -1,21 +1,19 @@
-from tvb.simulator.lab import models, connectivity, coupling, monitors, simulator
 import numpy as np
+from tvb.simulator.lab import models, connectivity, coupling, monitors, simulator
 
-# Load connectivity and set up model and simulator
-conn = connectivity.Connectivity.from_file()
-conn.speed = 3.0  # Propagation speed
+# Set the path to the downloaded connectivity file
+conn = connectivity.Connectivity.from_file("path/to/connectivity_76.zip")
 
-# Set up a Jansen-Rit neural mass model for each region
+# Set conduction speed as an array (one value for each region or a single value for all)
+conn.speed = np.array([3.0])  # Propagation speed for all regions
+
+# Configure the model, coupling, and integrator
 jansen_rit = models.JansenRit()
-
-# Define coupling and integrator
 linear_coupling = coupling.Linear(a=0.015)
 integrator = simulator.integrators.HeunDeterministic(dt=0.1)
-
-# Set up a monitor to collect raw output data
 raw_monitor = monitors.Raw()
 
-# Configure and run the simulation
+# Set up and configure the simulator
 sim = simulator.Simulator(
     model=jansen_rit,
     connectivity=conn,
@@ -25,7 +23,11 @@ sim = simulator.Simulator(
 )
 sim.configure()
 
-# Run simulation for a specified time duration in ms
-simulation_length = 1000  # in ms
+# Run simulation for 1000 ms
+simulation_length = 1000  # Duration in ms
 (raw_data,), = sim.run(simulation_length=simulation_length)
-time_series = raw_data[1][:, :, 0]  # Extract activity for each node over time
+
+# Extract time series data
+time_series = raw_data[1][:, :, 0]
+print(f"Time series shape: {time_series.shape}")
+
