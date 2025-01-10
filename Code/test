@@ -10,32 +10,94 @@ import time
 pressed = None
 on_time = None
 off_time = None
+import numpy as np
+
 # Define 3D coordinates for brain regions (nodes)
 nodes = np.array([
-    [0, 0, 0],  # Node 1
-    [1, 0, 0],  # Node 2
-    [0, 1, 0],  # Node 3
-    [0, 0, 1],  # Node 4
-    [1, 1, 0],  # Node 5
-    [1, 0, 1],  # Node 6
-    [0, 1, 1],  # Node 7
-    [1, 1, 1],  # Node 8
+    [20, -30, 60],   # Primary Somatosensory Cortex (Lateral, near central sulcus)
+    [-20, -100, 10],  # Primary Visual Cortex (Occipital lobe)
+    [-60, -20, 5],    # Primary Auditory Cortex (Temporal lobe)
+    [30, -20, 60],    # Primary Motor Cortex (Near central sulcus)
+    [40, 30, 50],     # Prefrontal Cortex (Anterior frontal lobe)
+    [20, -50, 50],    # Parietal Association Cortex (Near Parieto-occipital sulcus)
+    [-60, -40, 20],   # Temporal Association Cortex (Temporal lobe)
+    [10, -10, 20],    # Basal Ganglia (Subcortical, near internal capsule)
+    [0, -20, 10],     # Thalamus (Midline, near 3rd ventricle)
+    [-25, -30, -15],  # Hippocampus (Medial temporal lobe, near midline)
+    [-20, -30, -10],  # Amygdala (Medial temporal lobe, near hippocampus)
+    [30, -80, -35],   # Cerebellum (Posterior fossa)
+    [0, 30, 40],      # Cingulate Cortex (Medial frontal lobe, superior to corpus callosum)
+    [0, 0, -50]       # Brainstem (Midline, near pons and medulla)
 ])
 
-# Define connections (edges) between nodes
+# Calculate the center of the current brain regions
+current_center = np.mean(nodes, axis=0)
+
+# Desired center position for the brain (50, 50, 50)
+desired_center = np.array([50, 50, 50])
+
+# Shift the brain regions to center them at the desired position
+adjusted_nodes = nodes - current_center + desired_center
+print(adjusted_nodes)
+
+# Define connections (edges) between nodes (indices correspond to the nodes array)
 connections = [
-    (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7),
-    (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),
-    (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
-    (3, 4), (3, 5), (3, 6), (3, 7),
-    (4, 5), (4, 6), (4, 7),
-    (5, 6), (5, 7),
-    (6, 7)
+    (1, 5),  # Primary Visual Cortex ↔ Parietal Association Cortex
+    (2, 6),  # Primary Auditory Cortex ↔ Temporal Association Cortex
+    (4, 5),  # Prefrontal Cortex ↔ Parietal Association Cortex
+    (3, 12), # Primary Motor Cortex ↔ Cerebellum
+    (0, 3),  # Primary Somatosensory Cortex ↔ Primary Motor Cortex
+    (4, 7),  # Prefrontal Cortex ↔ Basal Ganglia
+    (3, 7),  # Primary Motor Cortex ↔ Basal Ganglia
+    (9, 4),  # Hippocampus ↔ Prefrontal Cortex
+    (10, 4), # Amygdala ↔ Prefrontal Cortex
+    (8, 1),  # Thalamus ↔ Primary Visual Cortex
+    (8, 3),  # Thalamus ↔ Primary Motor Cortex
+    (8, 5),  # Thalamus ↔ Parietal Association Cortex
+    (7, 8),  # Basal Ganglia ↔ Thalamus
+    (7, 3),  # Basal Ganglia ↔ Primary Motor Cortex
+    (7, 13), # Basal Ganglia ↔ Cingulate Cortex
+    (9, 10), # Hippocampus ↔ Amygdala
+    (13, 4), # Cingulate Cortex ↔ Prefrontal Cortex
+    (13, 5), # Cingulate Cortex ↔ Parietal Association Cortex
+    (12, 8), # Brainstem ↔ Thalamus
+    (12, 11), # Brainstem ↔ Cerebellum
+    (12, 4),  # Brainstem ↔ Prefrontal Cortex
+    (12, 2),  # Brainstem ↔ Primary Auditory Cortex
+    (12, 10), # Brainstem ↔ Amygdala
+    (11, 5),  # Cerebellum ↔ Parietal Association Cortex
+    (11, 4),  # Cerebellum ↔ Prefrontal Cortex
+    (11, 3),  # Cerebellum ↔ Primary Motor Cortex
+    (11, 7),  # Cerebellum ↔ Basal Ganglia
+    (11, 0),  # Cerebellum ↔ Primary Somatosensory Cortex
+    (11, 9),  # Cerebellum ↔ Hippocampus
+    (4, 1),   # Prefrontal Cortex ↔ Primary Visual Cortex
+    (2, 1),   # Prefrontal Cortex ↔ Primary Auditory Cortex
 ]
+
+# Dictionary mapping node indices to brain area names
+node_names = {
+    0: "Primary Somatosensory Cortex",
+    1: "Primary Visual Cortex",
+    2: "Primary Auditory Cortex",
+    3: "Primary Motor Cortex",
+    4: "Prefrontal Cortex",
+    5: "Parietal Association Cortex",
+    6: "Temporal Association Cortex",
+    7: "Basal Ganglia",
+    8: "Thalamus",
+    9: "Hippocampus",
+    10: "Amygdala",
+    11: "Cerebellum",
+    12: "Cingulate Cortex",
+    13: "Brainstem"
+}
+
+
 
 # Function to simulate activity over time (you can replace this with your model)
 def simulate_activity(t):
-    return np.abs(np.sin(0.1 * t + np.linspace(0, 2 * np.pi, len(nodes))))  # Activity between 0 and 1
+    return np.abs(np.sin(0.1 * t + np.linspace(0, 2 * np.pi, len(adjusted_nodes))))  # Activity between 0 and 1
 
 # Set up the 3D plot
 fig = plt.figure()
@@ -47,8 +109,8 @@ cmap = cm.viridis  # You can change this to any colormap you prefer
 # Add connections (edges) as lines (Initially, show all connections)
 edges = []
 for start_idx, end_idx in connections:
-    start_point = nodes[start_idx]
-    end_point = nodes[end_idx]
+    start_point = adjusted_nodes[start_idx]
+    end_point = adjusted_nodes[end_idx]
     edge, = ax.plot([start_point[0], end_point[0]], 
                     [start_point[1], end_point[1]], 
                     [start_point[2], end_point[2]], color='gray', lw=1)
@@ -58,9 +120,9 @@ for start_idx, end_idx in connections:
 node_scatter = ax.scatter([], [], [], c=[], cmap=cmap, s=100)
 
 # Set axis limits for better visualization
-ax.set_xlim([0, 1])
-ax.set_ylim([0, 1])
-ax.set_zlim([0, 1])
+ax.set_xlim([0, 100])
+ax.set_ylim([0, 100])
+ax.set_zlim([0, 100])
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
@@ -75,18 +137,18 @@ activity_text = ax.text2D(0.05, 0.95, '', transform=ax.transAxes, fontsize=12, c
 
 # Function to update the activity display in the legend or text box
 def update_activity_display(node_idx, activity_data):
-    activity_text.set_text(f"Node {node_idx + 1} Activity: {activity_data[node_idx]:.2f}")
+    activity_text.set_text(f"Node {node_names[node_idx]} Activity: {activity_data[node_idx]:.2f}")
     fig.canvas.draw()
 
 # Function to project 3D nodes to 2D based on the current view
-def project_to_2d(nodes, ax):
+def project_to_2d(adjusted_nodes, ax):
     """Projects 3D points to 2D based on the current view angle of the plot."""
     # Get the projection matrix
     proj_matrix = ax.get_proj()
 
     # Add a 1 to the node coordinates for homogeneous coordinates
-    ones = np.ones((nodes.shape[0], 1))
-    nodes_homogeneous = np.hstack((nodes, ones))
+    ones = np.ones((adjusted_nodes.shape[0], 1))
+    nodes_homogeneous = np.hstack((adjusted_nodes, ones))
 
     # Apply the projection matrix to the nodes (this gives us the 2D projected coordinates)
     projected = nodes_homogeneous @ proj_matrix.T
@@ -121,7 +183,7 @@ def update_connections(t):
     activity_data = simulate_activity(t)
     
     # Update the node colors based on the activity
-    node_scatter._offsets3d = (nodes[:, 0], nodes[:, 1], nodes[:, 2])  # Update node positions
+    node_scatter._offsets3d = (adjusted_nodes[:, 0], adjusted_nodes[:, 1], adjusted_nodes[:, 2])  # Update node positions
     node_scatter.set_array(activity_data)  # Update node colors based on activity
 
     # If a node is selected, show only its connections
@@ -164,7 +226,7 @@ def on_click(event):
     print(off_time-on_time)
     if pressed == False and off_time-on_time < 0.3:
         # Project the nodes to 2D space based on the current view
-        projected_nodes = project_to_2d(nodes, ax)
+        projected_nodes = project_to_2d(adjusted_nodes, ax)
 
         selected_node = check_node_click(event, projected_nodes)
         
